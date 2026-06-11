@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect Your Workspace — Shawn AI Services</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0B1F3A;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0B1F3A;
+      margin-bottom: 8px;
+    }
+    .logo span { color: #C47B2B; }
+    .subtitle {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 32px;
+    }
+    .divider {
+      border: none;
+      border-top: 1px solid #eee;
+      margin: 24px 0;
+    }
+    .step-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #0B1F3A;
+      margin-bottom: 8px;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 14px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 12px;
+      transition: opacity 0.2s;
+      text-decoration: none;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn-google {
+      background: #fff;
+      color: #333;
+      border: 2px solid #ddd;
+    }
+    .btn-slack {
+      background: #4A154B;
+      color: white;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      display: none;
+    }
+    .status.success {
+      background: #EAF3DE;
+      color: #3B6D11;
+      display: block;
+    }
+    .status.error {
+      background: #FCEBEB;
+      color: #A32D2D;
+      display: block;
+    }
+    .footer {
+      margin-top: 32px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <div class="logo">Shawn <span>AI</span> Services</div>
+  <div class="subtitle">Powered by Jane — Your AI Office Manager</div>
+
+  <hr class="divider">
+
+  <div class="step-title">Step 1 — Connect Google Workspace</div>
+  <div class="step-desc">
+    Jane needs access to your Gmail, Google Calendar, 
+    and Google Drive to manage your appointments, 
+    send emails, and keep your schedule organized.
+  </div>
+
+  <button class="btn btn-google" onclick="connectGoogle()">
+    <img src="https://www.google.com/favicon.ico" width="20">
+    Connect with Google
+  </button>
+
+  <hr class="divider">
+
+  <div class="step-title">Step 2 — Connect Slack</div>
+  <div class="step-desc">
+    Sannon will send you briefings, urgent alerts, 
+    and daily summaries directly to your Slack workspace.
+  </div>
+
+  <button class="btn btn-slack" onclick="connectSlack()">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+      <path d="M6 15a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm6 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm0-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm-6-6a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/>
+    </svg>
+    Add to Slack
+  </button>
+
+  <div id="status" class="status"></div>
+
+  <div class="footer">
+    Your credentials are never stored by Shawn AI Services.<br>
+    All connections are secured by Google and Slack OAuth.
+  </div>
+
+</div>
+
+<script>
+  // Get client_id from URL parameter
+  const params = new URLSearchParams(window.location.search);
+  const clientId = params.get('client_id') || 'unknown';
+
+  function connectGoogle() {
+    const googleClientId = '599005870346-ojdo59vsdou65lul3lv93f68mo2mbs62.apps.googleusercontent.com';
+    const redirectUri = 'https://shawn2004-r.github.io/shawn-ai-connect/callback.html';
+    const scope = [
+      'https://www.googleapis.com/auth/gmail.send',
+      'https://www.googleapis.com/auth/gmail.readonly',
+      'https://www.googleapis.com/auth/calendar.events',
+      'https://www.googleapis.com/auth/drive.file',
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/documents'
+    ].join(' ');
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+      `client_id=${googleClientId}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `scope=${encodeURIComponent(scope)}&` +
+      `response_type=code&` +
+      `access_type=offline&` +
+      `prompt=consent&` +
+      `state=${clientId}`;
+
+    window.location.href = authUrl;
+  }
+
+  function connectSlack() {
+    const slackClientId = 'PASTE_YOUR_SLACK_CLIENT_ID_HERE';
+    const redirectUri = 'https://shawn2004-r.github.io/shawn-ai-connect/slack-callback.html';
+    const scope = 'incoming-webhook,chat:write';
+
+    const authUrl = `https://slack.com/oauth/v2/authorize?` +
+      `client_id=${slackClientId}&` +
+      `scope=${scope}&` +
+      `redirect_uri=${encodeURIComponent(redirectUri)}&` +
+      `state=${clientId}`;
+
+    window.location.href = authUrl;
+  }
+
+  // Check if returning from OAuth
+  if (params.get('connected') === 'google') {
+    document.getElementById('status').className = 'status success';
+    document.getElementById('status').textContent = 
+      '✅ Google Workspace connected successfully! Jane is ready.';
+  }
+  if (params.get('connected') === 'slack') {
+    document.getElementById('status').className = 'status success';
+    document.getElementById('status').textContent = 
+      '✅ Slack connected successfully! Sannon is ready.';
+  }
+</script>
+
+</body>
+</html>
