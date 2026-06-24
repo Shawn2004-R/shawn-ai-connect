@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connecting — Shawn AI Services</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0B1F3A;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0B1F3A;
+      margin-bottom: 8px;
+    }
+    .logo span { color: #C47B2B; }
+    .status {
+      margin-top: 24px;
+      padding: 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    .status.loading {
+      background: #E6F1FB;
+      color: #185FA5;
+    }
+    .status.success {
+      background: #EAF3DE;
+      color: #3B6D11;
+    }
+    .status.error {
+      background: #FCEBEB;
+      color: #A32D2D;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #E6F1FB;
+      border-top: 4px solid #185FA5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 16px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #C47B2B;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Shawn <span>AI</span> Services</div>
+
+  <div id="status" class="status loading">
+    <div class="spinner"></div>
+    Connecting your Google Workspace...<br>
+    <small>Please wait, this takes a few seconds.</small>
+  </div>
+
+</div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+  import { getFirestore, doc, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js';
+
+  // Firebase config — replace with your actual config
+  const firebaseConfig = {
+    apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
+    authDomain: "shawn-ai-services.firebaseapp.com",
+    projectId: "shawn-ai-services",
+    storageBucket: "shawn-ai-services.appspot.com",
+    messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const clientId = params.get('state');
+  const error = params.get('error');
+
+  const statusEl = document.getElementById('status');
+
+  if (error) {
+    statusEl.className = 'status error';
+    statusEl.innerHTML = `
+      ❌ Connection cancelled.<br>
+      <small>You can close this window and try again.</small>
+      <br><a class="btn" href="index.html">Try Again</a>
+    `;
+  } else if (code && clientId) {
+    // Exchange code for tokens via Make.com webhook
+    const makeWebhookUrl = 'PASTE_YOUR_MAKE_WEBHOOK_URL_HERE';
+
+    fetch(makeWebhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code: code,
+        client_id: clientId,
+        redirect_uri: 'https://shawn2004-r.github.io/shawn-ai-connect/callback.html'
+      })
+    })
+    .then(response => response.json())
+    .then(async data => {
+      if (data.success) {
+        // Update Firebase with connected status
+        await updateDoc(doc(db, 'customers', clientId), {
+          connected: true,
+          connected_at: new Date().toISOString()
+        });
+
+        statusEl.className = 'status success';
+        statusEl.innerHTML = `
+          ✅ Google Workspace connected successfully!<br><br>
+          <strong>Jane is now active</strong> and ready to manage 
+          your appointments, emails, and calendar.<br><br>
+          <small>You can close this window.</small>
+        `;
+      } else {
+        throw new Error('Token exchange failed');
+      }
+    })
+    .catch(err => {
+      statusEl.className = 'status error';
+      statusEl.innerHTML = `
+        ❌ Something went wrong during connection.<br>
+        <small>Please try again or contact support.</small>
+        <br><a class="btn" href="index.html">Try Again</a>
+      `;
+    });
+  } else {
+    statusEl.className = 'status error';
+    statusEl.innerHTML = `
+      ❌ Invalid callback — no authorization code received.<br>
+      <a class="btn" href="index.html">Go Back</a>
+    `;
+  }
+</script>
+
+</body>
+</html>
