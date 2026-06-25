@@ -131,11 +131,7 @@
         redirect_uri: 'https://shawn2004-r.github.io/shawn-ai-connect/callback.html'
       })
     })
-   .then(response => {
-  // Show success regardless of response format
-  // since tokens are already saved in Google Sheets
-  return { success: true };
-})
+   .then(response => response.json())
 .then(async data => {
   if (data.success) {
         // Update Firebase with connected status
