@@ -33,7 +33,7 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const code = params.get('code');
-  const clientId = params.get('state'); // Google passes your client_id back inside 'state'
+  const clientId = params.get('state'); 
   const error = params.get('error');
   const statusEl = document.getElementById('status');
 
@@ -42,10 +42,10 @@
     statusEl.innerHTML = `❌ Connection cancelled.<br><small>You can close this window and try again.</small><br><a class="btn" href="index.html">Try Again</a>`;
   } else if (code && clientId) {
     
-    // REPLACE THIS WITH YOUR ACTUAL MAKE.COM WEBHOOK URL
+    // Paste your exact Make Webhook URL here
     const makeWebhookUrl = 'https://hook.us2.make.com/whdu139co5toulmc1qjhbbsge72uylbp';
 
-    // Fire the data over to Make.com silently in the background
+    // Fire data to Make in the background
     fetch(makeWebhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,8 +56,7 @@
       })
     });
 
-    // Optimistic UI update: Because the background network request was sent,
-    // we display success immediately and avoid annoying browser CORS error flags.
+    // Instantly switch UI to clean green success state
     setTimeout(() => {
         statusEl.className = 'status success';
         statusEl.innerHTML = `
